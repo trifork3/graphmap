@@ -9,26 +9,14 @@ from plyer import gps
 from kivy.logger import Logger
 from kivy.app import App
 
-from kivy.storage.jsonstore import JsonStore
+import json
 
 from plyer import email
 
-from kivy.graphics import *
-from kivy.core.text import Label as CoreLabel
-
-from fakegps import FakeGPS
-
-def make_number_image(num):
-    widg = Widget()
-    label = CoreLabel(text=str(num), text_size=[10, 10])
-    label.refresh()
-    texture = label.texture
-    texture_size = list(texture.size)
-    widg.canvas.add(Rectangle(texture=texture, size=texture_size))
-    widg.export_to_png("./images/" + str(num) + ".png")
+#from fakegps import FakeGPS
 
 def strlist(mylist):
-    return "[" + ' '.join(str(x) for x in mylist) + "]"
+    return ' '.join(str(x) for x in mylist)
 
 class MainMap(Widget):
     mapview = ObjectProperty(None)
@@ -59,14 +47,13 @@ class MainMap(Widget):
             self.map_loaded = True
 
     def drop(self):
-        self.nodes.append({ "id": self.nodesnum, "name": self.textinput.text, "lat": self.latitude, "lon": self.longitude, "numnodes": 1, "nodes": [] })
+        self.nodes.append({ "id": self.nodesnum, "name": self.textinput.text, "lat": self.latitude, "lon": self.longitude, "numnodes": 0, "nodes": [] })
         if self.nodesnum > 0:
+            self.nodes[self.nodesnum]["numnodes"] = 1
             self.nodes[self.nodesnum]["nodes"].append(int(self.slider.value))
             self.nodes[int(self.slider.value)]["nodes"].append(self.nodesnum)
             self.nodes[int(self.slider.value)]["numnodes"] += 1
 
-        #make_number_image(self.nodesnum)
-        #self.mapview.add_marker(MapMarker(lon=self.longitude, lat=self.latitude, source="./images/" + str(self.nodesnum) + ".png"))
         self.mapview.add_marker(MapMarker(lon=self.longitude, lat=self.latitude))
 
         #Logger.info("Application: \nNode added {\n" + "id: " + str(self.nodes[self.nodesnum]["id"]) + "\nname: " + self.nodes[self.nodesnum]["name"] +
@@ -80,17 +67,16 @@ class MainMap(Widget):
         self.nodesnum += 1
 
     def save(self):
-        store = JsonStore(App().user_data_dir + "graphmap.json")
+        output = "["
         for node in self.nodes:
-            store.put('node' + str(node["id"]), id=str(node["id"]),
-                                                name=node["name"],
-                                                lat=str(node["lat"]),
-                                                lon=str(node["lon"]),
-                                                numnodes=str(node["numnodes"]),
-                                                nodes=strlist(node["nodes"]))
+            output += json.dumps(node)
+            if node["id"] < self.nodesnum - 1:
+                output += ", "
+        output += "]"
 
-        fp = open(App().user_data_dir + "graphmap.json", "r")
-        email.send(recipient="rwilliams17@lawrenceville.org", text=fp.read())
+        #Logger.info("Application: " + output)
+
+        email.send(recipient="rwilliams17@lawrenceville.org", text=output)
 
 class MainApp(App):
     def build(self):
