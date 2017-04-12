@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="visualizer.js" defer></script>
+        <link href="https://fonts.googleapis.com/css?family=Amatic+SC:700" rel="stylesheet">
+        <style>
+            #map {
+                height: 400px;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <form id="json">
+            <input type="text" name="data">
+            <input type="button" onclick="loadJSON()" value="Submit">
+        </form>
+
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-V41RsHObfMvb_YFRYJgG14vR_fyqvFY&callback=initMap">
+        </script>
+    </body>
+</html>
