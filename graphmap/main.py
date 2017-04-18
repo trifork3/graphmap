@@ -13,10 +13,7 @@ import json
 
 from plyer import email
 
-#from fakegps import FakeGPS
-
-def strlist(mylist):
-    return ' '.join(str(x) for x in mylist)
+from fakegps import FakeGPS
 
 class MainMap(Widget):
     mapview = ObjectProperty(None)
@@ -28,11 +25,10 @@ class MainMap(Widget):
     nodesnum = NumericProperty(0)
     nodename = StringProperty("")
 
-    slider = ObjectProperty(None)
     textinput = ObjectProperty(None)
 
-    locater = gps
-    #locater = FakeGPS()
+    #locater = gps
+    locater = FakeGPS()
 
     map_loaded = False
     nodes = []
@@ -47,22 +43,18 @@ class MainMap(Widget):
             self.map_loaded = True
 
     def drop(self):
-        self.nodes.append({ "id": self.nodesnum, "name": self.textinput.text, "lat": self.latitude, "lon": self.longitude, "numnodes": 0, "nodes": [] })
-        if self.nodesnum > 0:
-            self.nodes[self.nodesnum]["numnodes"] = 1
-            self.nodes[self.nodesnum]["nodes"].append(int(self.slider.value))
-            self.nodes[int(self.slider.value)]["nodes"].append(self.nodesnum)
-            self.nodes[int(self.slider.value)]["numnodes"] += 1
+        self.nodes.append({ "id": self.nodesnum, "name": self.textinput.text, "lat": self.latitude, "lon": self.longitude, "numnodes": 0, "neighbors": [] })
+        #if self.nodesnum > 0:
+        #    self.nodes[self.nodesnum]["numnodes"] = 1
+        #    self.nodes[self.nodesnum]["nodes"].append(int(self.slider.value))
+        #    self.nodes[int(self.slider.value)]["nodes"].append(self.nodesnum)
+        #    self.nodes[int(self.slider.value)]["numnodes"] += 1
 
         self.mapview.add_marker(MapMarker(lon=self.longitude, lat=self.latitude))
 
         #Logger.info("Application: \nNode added {\n" + "id: " + str(self.nodes[self.nodesnum]["id"]) + "\nname: " + self.nodes[self.nodesnum]["name"] +
         #            "\nlatitude: " + str(self.nodes[self.nodesnum]["lat"]) + "\nlongitude: " + str(self.nodes[self.nodesnum]["lon"]) +
         #            "\nnumnodes: " + str(self.nodes[self.nodesnum]["numnodes"]) + "\nnodes: " + strlist(self.nodes[self.nodesnum]["nodes"]))
-
-        self.lastnode = self.nodesnum
-
-        self.slider.value = self.nodesnum
 
         self.nodesnum += 1
 
@@ -77,6 +69,9 @@ class MainMap(Widget):
         #Logger.info("Application: " + output)
 
         email.send(recipient="rwilliams17@lawrenceville.org", text=output)
+
+    def reset(self):
+        pass
 
 class MainApp(App):
     def build(self):
