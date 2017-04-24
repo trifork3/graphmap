@@ -57,7 +57,8 @@ function loadJSON() {
         markers.push(new google.maps.Marker({
             icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
             position: pos,
-            map: map
+            map: map,
+            title:node["name"]
         }));
 
         // draw the edges that already exist in the JSON
