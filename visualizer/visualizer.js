@@ -14,6 +14,57 @@ function initMap() {
         zoom: 16,
         center: mapcenter
     });
+
+    // create a new node on the map
+    map.addListener('rightclick', function(e) {
+
+    });
+}
+
+function createMarker(node, index) {
+    var pos = { lat: node["lat"], lng: node["lon"] };
+    markers.push(new google.maps.Marker({
+        icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        position: pos,
+        map: map,
+        title: node["name"]
+    }));
+
+    // add functionality to right-click nodes to connect them
+    markers[index].addListener('rightclick', function() {
+        markers[index].setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+        if (firstnode == -1) {
+            firstnode = index;
+
+        } else if (secondnode == -1) {
+            secondnode = index;
+            connectNodes();
+        }
+    });
+
+    // add functionality to click and delete the node
+    markers[index].addListener('click', function() {
+        if (confirm("Do you want to delete " + data[index]["name"] + "?") == true) {
+            //console.log(data[index]);
+            //console.log(markers[index]);
+
+            // first delete the node and marker
+            //data.splice(index, 1);
+            markers[index].setMap(null);
+            //markers.splice(index, 1);
+            data[index]["id"] = -1;
+
+            console.log(data[index]);
+            //console.log(markers[index]);
+
+            // delete all connections to the node
+            data.forEach(function(i) {
+                data[i]["neighbors"].replace(" " + index, "");
+                data[i]["neighbors"].replace(index + " ", "");
+                data[i]["neighbors"].replace(index, "");
+            });
+        }
+    });
 }
 
 // connect two selected nodes both visually and backend-ly
@@ -53,12 +104,7 @@ function loadJSON() {
     data = JSON.parse(json);
 
     data.forEach(function(node, index) {
-        var pos = { lat: node["lat"], lng: node["lon"] };
-        markers.push(new google.maps.Marker({
-            icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-            position: pos,
-            map: map
-        }));
+        createMarker(node, index);
 
         // draw the edges that already exist in the JSON
         if (node["numnodes"] > 0) {
@@ -70,23 +116,17 @@ function loadJSON() {
                 edge.setMap(map);
             });
         }
-
-        // add functionality to click nodes to connect them
-        markers[index].addListener('click', function() {
-            markers[index].setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
-            if (firstnode == -1) {
-                firstnode = index;
-
-            } else if (secondnode == -1) {
-                secondnode = index;
-                connectNodes();
-            }
-        });
     });
 }
 
 // show the current JSON (with edits and all) to the user in a new window
 function showJSON() {
+    data.forEach(function(node, index) {
+        if (node["id"] == -1) {
+            data.splice(index, 1);
+        }
+    });
+
     var newWindow = window.open();
     newWindow.document.write(JSON.stringify(data));
 }
