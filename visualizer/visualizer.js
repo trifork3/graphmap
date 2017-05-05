@@ -3,6 +3,8 @@ var map = null;
 var markers = [];
 var data = [];
 
+var numnodes = 0;
+
 var firstnode = -1;
 var secondnode = -1;
 
@@ -17,7 +19,17 @@ function initMap() {
 
     // create a new node on the map
     map.addListener('rightclick', function(e) {
+        var name = prompt("Name of node?", "node" + numnodes);
+        data.push({ id: numnodes,
+                    name: name,
+                    lat: e.latLng.lat(),
+                    lon: e.latLng.lng(),
+                    numnodes: 0,
+                    neighbors: [] });
 
+        createMarker(data[numnodes], numnodes);
+
+        numnodes++;
     });
 }
 
@@ -116,6 +128,8 @@ function loadJSON() {
                 edge.setMap(map);
             });
         }
+
+        numnodes++;
     });
 }
 
